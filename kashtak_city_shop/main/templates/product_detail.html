@@ -1,0 +1,18 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div>
+    <div style="display: inline;">
+        {% for image in product.images.all %}
+        <img src="{{ image.image.url }}" alt="Изображение товара" style="width: 250px; margin-left: 50px">
+        {% endfor %}
+    </div>
+    <p>{{ product.title }}</p>
+    <p>{{ product.price }}</p>
+    <p>{{ product.size }}</p>
+    <p>{{ product.product_description }}</p>
+    <p>{{ product.model_description }}</p>
+    <p>{{ product.delivery_description }}</p>
+    <p>{{ product.vendor_code }}</p>
+</div>
+{% endblock %}

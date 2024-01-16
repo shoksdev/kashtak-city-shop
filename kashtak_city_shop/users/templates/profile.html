@@ -1,0 +1,42 @@
+{% extends "layout/base.html" %}
+
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<h2>Профиль пользователя {{ request.user.username }}</h2>
+<p>Здравствуйте, {{ request.user.first_name|capfirst }} {{ request.user.last_name|capfirst }}!</p>
+{% if request.user.avatar %}
+<p><img src="{{ request.user.avatar.url }}" alt="Аватар" style="width: 100px;"></p>
+{% else %}
+<img src="" alt="Аватар" style="width: 100px;">
+{% endif %}
+<p>Количество ваших бонусов: {{ request.user.bonuses }}</p>
+<p>Ваш реферальный код: {{ request.user.referral_code }}</p>
+
+{% if orders_list %}
+<h2>Ваши заказы:</h2>
+{% for order in orders_list %}
+<p>Дата и время создания заказа: {{ order.created }}</p>
+<p>ID Заказа: {{ order.id }}</p>
+<p>Статус заказа: {{ order.get_status_display }}</p>
+{% for product in order.items.all %}
+<p><img src="{{ product.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
+<p>{{ product.title }}</p>
+<p>{{ product.price }}</p>
+<p>-------------------------------------------</p>
+{% endfor %}
+
+<br>
+{% endfor %}
+{% else %}
+<p>В данный момент у вас нет заказов, оформите его скорее!</p>
+{% endif %}
+<a href="{% url 'password_change' %}" class="btn btn-primary">Изменить пароль</a>
+<br>
+<br>
+<a href="{% url 'information_change' %}" class="btn btn-primary">Изменить информацию</a>
+<br>
+<br>
+<a href="{% url 'address_change' %}" class="btn btn-primary">Изменить адрес</a>
+{% endblock %}
