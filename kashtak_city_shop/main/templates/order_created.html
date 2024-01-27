@@ -1,0 +1,15 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Thank you{% endblock %}
+
+{% block content %}
+    <h1>Спасибо!</h1>
+    <p>Ваш заказ создан, вот информация о нем:</p>
+    {% for product in order.item_set.all %}
+        <p>{{ product.title }}</p>
+        <p><img src="{{ item.product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
+        <p>{{ item.quantity }}</p>
+        <p>{{ item.price }}</p>
+        <p>{{ item.total_price }}</p>
+    {% endfor %}
+{% endblock %}

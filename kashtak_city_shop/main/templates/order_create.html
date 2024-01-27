@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% load bootstrap4 %}
+
+{% block title %}Создание заказа{% endblock %}
+
+{% block content %}
+    <h2>Создание категории</h2>
+    <div style="display: flex">
+        <form method="POST" style="width: 500px">
+            {% csrf_token %}
+            {% bootstrap_form form layout='horizontal' %}
+            {% buttons submit='Создать' %}{% endbuttons %}
+        </form>
+
+        <div style="margin-left: 100px">
+            <p><strong>Ваш заказ:</strong></p>
+            {% for item in cart %}
+            <a href="{% url 'product_detail' pk=item.product.id %}">
+                <div>
+                    <p>{{ item.product.title }}</p>
+                    <p><img src="{{ item.product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
+                </div>
+            </a>
+            <p>{{ item.size }}</p>
+            <p>{{ item.quantity }}</p>
+            <p>{{ item.price }}</p>
+            <p>{{ item.total_price }}</p>
+            {% endfor %}
+            <p>Общая цена корзины: {{ cart.get_total_price }}</p>
+        </div>
+    </div>
+{% endblock %}

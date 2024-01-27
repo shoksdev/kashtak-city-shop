@@ -1,0 +1,57 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div>
+    <div style="display: inline;">
+        {% for image in product.images.all %}
+        <img src="{{ image.image.url }}" alt="Изображение товара" style="width: 250px; margin-left: 50px">
+        {% endfor %}
+    </div>
+    <p>{{ product.title }}</p>
+    <p>{{ product.price }}</p>
+    <p>{{ product.size }}</p>
+    <p>{{ product.product_description }}</p>
+    <p>{{ product.model_description }}</p>
+    <p>{{ product.delivery_description }}</p>
+    <p>{{ product.vendor_code }}</p>
+</div>
+{% comment %}
+        <select>
+            <option value="" selected>Выберите размер</option>
+            {% for size in product.sizes.all %}
+                {% if size.quantity != 0 %}
+                    <option value="{{ size.size }}">{{ size.size }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+{% endcomment %}
+
+{% if product.quantity == 0 %}
+    <p>Товара нет в наличии</p>
+{% else %}
+    <form action="{% url 'cart_add' product.id %}" method="post">
+        {% csrf_token %}
+        <div>
+        {% for field in cart_form %}
+            {% if field.name == 'size' %}
+            <select name="size" class="form-select w-25">
+                <option value="" selected>Выберите размер</option>
+                {% for size in product.sizes.all %}
+                    {% if size.quantity != 0 %}
+                        <option value="{{ size.size }}">{{ size.size }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            {% else %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    <div>{{ field }}</div>
+                    <div class="error">{{ field.errors }}</div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        </div>
+        <p><input type="submit" class="btn btn-primary" value="Добавить в корзину" ></p>
+    </form>
+{% endif %}
+{% endblock %}

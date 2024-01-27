@@ -1,0 +1,27 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+{% if category_title %}
+<h1 style="text-align: center">{{ category_title }}</h1>
+{% else %}
+<h1 style="text-align: center">Все товары</h1>
+{% endif %}
+{% if products_list %}
+{% for product in products_list %}
+<a href="{% url 'product_detail' pk=product.id %}" style="width: 300px;">
+    <div style="width: 300px;">
+        <p><img src="{{ product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
+        <p>{{ product.title }}</p>
+        <p>{{ product.price }}</p>
+        {% if product.quantity %}
+            <p>Товар в наличии</p>
+        {% else %}
+            <p>Товара нет в наличии</p>
+        {% endif %}
+    </div>
+</a>
+{% endfor %}
+{% else %}
+<p>В данный момент в магазине нет товаров, загляните позже.</p>
+{% endif %}
+{% endblock %}

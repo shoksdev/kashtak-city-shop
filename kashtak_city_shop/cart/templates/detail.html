@@ -1,0 +1,33 @@
+{% extends "layout/base.html" %}
+{% block title %}Корзина{% endblock %}
+{% block content %}
+    {% if cart_len == 0 %}
+        <p>Ваша корзина пуста, добавьте товар в корзину, чтобы оформить заказ</p>
+        <p>
+            <a href="{% url 'index' %}" class="btn btn-primary">Продолжить покупки</a>
+        </p>
+    {% else %}
+        <h1 style="text-align: center">Ваша корзина</h1>
+        {% for item in cart %}
+            <a href="{% url 'product_detail' pk=item.product.id %}">
+                <div>
+                    <p>{{ item.product.title }}</p>
+                    <p><img src="{{ item.product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
+                </div>
+            </a>
+            <p>{{ item.size }}</p>
+            <p>{{ item.quantity }}</p>
+            <p>{{ item.price }}</p>
+            <p>{{ item.total_price }}</p>
+            <p><a href="{% url 'cart_remove_all_product_items' item.product.id %}">Удалить полностью</a></p>
+            <p><a href="{% url 'cart_remove_one_product_item' item.product.id %}">Удалить один объект</a></p>
+        {% endfor %}
+        <p>Общая цена корзины: {{ cart.get_total_price }}</p>
+        <p>
+            <a href="{% url 'index' %}" class="btn btn-primary">Продолжить покупки</a>
+        </p>
+        <p>
+            <a class="btn btn-primary" href="{% url 'order_create' %}">Оформить заказ</a>
+        </p>
+    {% endif %}
+{% endblock %}
