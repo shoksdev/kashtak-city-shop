@@ -9,19 +9,18 @@
     {% else %}
         <h1 style="text-align: center">Ваша корзина</h1>
         {% for item in cart %}
-            {{ item.id }}
             <a href="{% url 'product_detail' pk=item.product.id %}">
                 <div>
                     <p>{{ item.product.title }}</p>
                     <p><img src="{{ item.product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
                 </div>
             </a>
-            <p>{{ item.size }}</p>
-            <p>{{ item.quantity }}</p>
-            <p>{{ item.price }}</p>
-            <p>{{ item.total_price }}</p>
-            <p><a href="{% url 'cart_remove_one_product_item' pk=item.id %}">Удалить один объект</a></p>
-            <p><a href="{% url 'cart_remove_all_product_items' pk=item.id %}">Удалить объект полностью</a></p>
+            <p>Размер товара: {{ item.size }}</p>
+            <p>Количество товара: {{ item.quantity }}</p>
+            <p>Цена единицы товара: {{ item.price }}</p>
+            <p>Общая цена товара: {{ item.total_price }}</p>
+            <p><a href="{% url 'cart_remove_one_product_item' pk=item.id %}">Удалить одну единицу товара</a></p>
+            <p><a href="{% url 'cart_remove_all_product_items' pk=item.id %}">Удалить товар из корзины полностью</a></p>
         {% endfor %}
         <p>Общая цена корзины: {{ cart.get_total_price }}</p>
 <p><a href="{% url 'cart_clear' %}">Очистить корзину</a></p>

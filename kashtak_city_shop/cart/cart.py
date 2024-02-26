@@ -50,17 +50,23 @@ class Cart(object):
         if product_id not in self.product_ids:
             self.cart[last_key + 1] = new_cart_item
         else:
+            flag = False
+            cart_item_position = None
             for cart_item in range(1, len(self.cart) + 1):
                 cart_item_str = str(cart_item)
                 if self.cart[cart_item_str]['product_id'] == product_id and update_quantity:
                     self.cart[cart_item_str]['quantity'] = quantity
                     break
-                if self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] != size:
-                    self.cart[last_key + 1] = new_cart_item
-                    break
                 elif self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] == size:
-                    self.cart[cart_item_str]['quantity'] += quantity
+                    flag, cart_item_position = False, cart_item_str
                     break
+                elif self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] != size:
+                    flag = True
+            if flag:
+                self.cart[last_key + 1] = new_cart_item
+            else:
+                self.cart[cart_item_position]['quantity'] += quantity
+
         print(self.cart)
 
         self.save()
