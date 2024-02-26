@@ -9,6 +9,7 @@
     {% else %}
         <h1 style="text-align: center">Ваша корзина</h1>
         {% for item in cart %}
+            {{ item.id }}
             <a href="{% url 'product_detail' pk=item.product.id %}">
                 <div>
                     <p>{{ item.product.title }}</p>
@@ -19,10 +20,11 @@
             <p>{{ item.quantity }}</p>
             <p>{{ item.price }}</p>
             <p>{{ item.total_price }}</p>
-            <p><a href="{% url 'cart_remove_all_product_items' item.product.id %}">Удалить полностью</a></p>
-            <p><a href="{% url 'cart_remove_one_product_item' item.product.id %}">Удалить один объект</a></p>
+            <p><a href="{% url 'cart_remove_one_product_item' pk=item.id %}">Удалить один объект</a></p>
+            <p><a href="{% url 'cart_remove_all_product_items' pk=item.id %}">Удалить объект полностью</a></p>
         {% endfor %}
         <p>Общая цена корзины: {{ cart.get_total_price }}</p>
+<p><a href="{% url 'cart_clear' %}">Очистить корзину</a></p>
         <p>
             <a href="{% url 'index' %}" class="btn btn-primary">Продолжить покупки</a>
         </p>

@@ -13,8 +13,11 @@ class Cart(object):
         cart = self.session.get(settings.CART_SESSION_ID)
         if not cart:
             # save an empty cart in the session
-            cart = self.session[settings.CART_SESSION_ID] = []
+            cart = self.session[settings.CART_SESSION_ID] = {}
         self.cart = cart
+        self.product_ids = set()
+        for cart_item in self.cart.values():
+            self.product_ids.add(int(cart_item.get('product_id')))
 
     def add(self, product, size, quantity=1, update_quantity=False):
         """
@@ -28,15 +31,39 @@ class Cart(object):
         #     else:
         #         cart.append(cart_item_new)
         #         break
-        product_id = str(product.id)
-        print(self.cart)
         # if product_id not in self.cart:
         #     self.cart[product_id] = {'product_id': product_id, 'quantity': 0, 'size': size, 'price': str(product.price)}
         # if update_quantity:
         #     self.cart[product_id]['quantity'] = quantity
         # else:
         #     self.cart[product_id]['quantity'] += quantity
-        # self.save()
+
+        product_id = product.id
+
+        new_cart_item = {'product_id': product_id, 'quantity': quantity, 'size': size, 'price': str(product.price)}
+
+        if not bool(self.cart):
+            last_key = 0
+        else:
+            last_key = int(max(self.cart))
+        print(self.product_ids)
+        if product_id not in self.product_ids:
+            self.cart[last_key + 1] = new_cart_item
+        else:
+            for cart_item in range(1, len(self.cart) + 1):
+                cart_item_str = str(cart_item)
+                if self.cart[cart_item_str]['product_id'] == product_id and update_quantity:
+                    self.cart[cart_item_str]['quantity'] = quantity
+                    break
+                if self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] != size:
+                    self.cart[last_key + 1] = new_cart_item
+                    break
+                elif self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] == size:
+                    self.cart[cart_item_str]['quantity'] += quantity
+                    break
+        print(self.cart)
+
+        self.save()
 
     def save(self):
         # Обновление сессии cart
@@ -44,44 +71,41 @@ class Cart(object):
         # Отметить сеанс как "измененный", чтобы убедиться, что он сохранен
         self.session.modified = True
 
-    def remove_all_product_items(self, product):
-        """
-        Удаление всего товара из корзины.
-        """
-        product_id = str(product.id)
-        if product_id in self.cart:
-            del self.cart[product_id]
-            self.save()
+    def remove_all_product_items(self, cart_item_id):
+        del self.cart[str(cart_item_id)]
+        self.save()
 
-    def remove_one_product_item(self, product):
+    def remove_one_product_item(self, cart_item_id):
         """
         Удаление одного товара из корзины.
         """
-        product_id = str(product.id)
-        if product_id in self.cart:
-            self.cart[product_id]['quantity'] -= 1
-            self.save()
+        cart_item = self.cart[str(cart_item_id)]
+        if cart_item['quantity'] <= 1:
+            del self.cart[str(cart_item_id)]
+        else:
+            cart_item['quantity'] -= 1
+        self.save()
 
     def all_products(self):
-        product_ids = self.cart.keys()
         # получение объектов product и добавление их в корзину
-        products = Product.objects.filter(id__in=product_ids).values_list(flat=True)
+        products = Product.objects.filter(id__in=self.product_ids).values_list(flat=True)
         return products
 
     def __iter__(self):
         """
         Перебор элементов в корзине и получение продуктов из базы данных.
         """
-        product_ids = self.cart.keys()
         # получение объектов product и добавление их в корзину
-        products = Product.objects.filter(id__in=product_ids)
-        for product in products:
-            self.cart[str(product.id)]['product'] = product
+        products = Product.objects.filter(id__in=self.product_ids)
+        for value in self.cart.values():
+            product = products.get(id=value['product_id'])
+            value['product'] = product
 
-        for item in self.cart.values():
-            item['price'] = Decimal(item['price'])
-            item['total_price'] = item['price'] * item['quantity']
-            yield item
+        for key, value in self.cart.items():
+            value['price'] = Decimal(value['price'])
+            value['total_price'] = value['price'] * value['quantity']
+            value['id'] = key
+            yield value
 
     def len(self):
         """

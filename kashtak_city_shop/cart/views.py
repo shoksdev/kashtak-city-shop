@@ -1,9 +1,7 @@
-from django.forms import inlineformset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from main.models import Product
 from .cart import Cart
 from .forms import CartAddProductForm
-from main.models import ProductSize
 
 
 def cart_add(request, pk):
@@ -14,6 +12,7 @@ def cart_add(request, pk):
         if form.is_valid():
             cd = form.cleaned_data
             print(cd)
+            print(product)
             cart.add(product=product,
                      quantity=cd['quantity'],
                      size=cd['size'],
@@ -21,17 +20,20 @@ def cart_add(request, pk):
         return redirect('cart_detail')
 
 
-def cart_remove_all_product_items(request, pk):
-    cart = Cart(request)
-    product = get_object_or_404(Product, id=pk)
-    cart.remove_all_product_items(product)
+def cart_clear(request):
+    Cart(request).clear()
     return redirect('cart_detail')
 
 
 def cart_remove_one_product_item(request, pk):
     cart = Cart(request)
-    product = get_object_or_404(Product, id=pk)
-    cart.remove_one_product_item(product)
+    cart.remove_one_product_item(pk)
+    return redirect('cart_detail')
+
+
+def cart_remove_all_product_items(request, pk):
+    cart = Cart(request)
+    cart.remove_all_product_items(pk)
     return redirect('cart_detail')
 
 

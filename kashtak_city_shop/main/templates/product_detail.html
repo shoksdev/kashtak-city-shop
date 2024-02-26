@@ -26,9 +26,8 @@
         </select>
 {% endcomment %}
 
-{% if product.quantity == 0 %}
-    <p>Товара нет в наличии</p>
-{% else %}
+
+
     <form action="{% url 'cart_add' product.id %}" method="post">
         {% csrf_token %}
         <div>
@@ -53,5 +52,4 @@
         </div>
         <p><input type="submit" class="btn btn-primary" value="Добавить в корзину" ></p>
     </form>
-{% endif %}
 {% endblock %}
