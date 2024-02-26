@@ -5,11 +5,14 @@
 {% block content %}
     <h1>Спасибо!</h1>
     <p>Ваш заказ создан, вот информация о нем:</p>
-    {% for product in order.item_set.all %}
-        <p>{{ product.title }}</p>
-        <p><img src="{{ item.product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
-        <p>{{ item.quantity }}</p>
-        <p>{{ item.price }}</p>
-        <p>{{ item.total_price }}</p>
+    {% for order_item in order.items.all %}
+        <p><img src="{{ order_item.product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
+        <p>Название: {{ order_item.product.title }}</p>
+        <p>Размер: {{ order_item.size }}</p>
+        <p>Количество товара: {{ order_item.quantity }}</p>
+        <p>Цена одной единицы товара: {{ order_item.price }}</p>
+        <p>Цена товара в сумме: {{ order_item.calculate_product_total_sum }}</p>
     {% endfor %}
+    <p>Стоимость заказа: {{ order.calculate_total_sum }}</p>
+
 {% endblock %}

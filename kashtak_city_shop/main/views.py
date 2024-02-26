@@ -51,15 +51,16 @@ class OrderCreateView(CreateView):
         cart = Cart(self.request)
         instance = form.save()
         for item in cart:
+            product = item['product']
             OrderItem.objects.create(
                 order=instance,
-                product=item['product'],
+                product=product,
                 price=item['price'],
-                quantity=item['quantity']
+                quantity=item['quantity'],
+                size=item['size']
             )
-            product = item['product']
-            product.quantity -= item['quantity']
-            product.save()
+            # product.quantity -= item['quantity']  # TODO: Удалять не из product.quantity, а из product.sizes.quantity
+            # product.save()
         cart.clear()
 
         return redirect(reverse('order_created', kwargs={'pk': instance.id}))

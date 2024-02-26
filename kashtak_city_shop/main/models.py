@@ -79,15 +79,33 @@ class Order(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0], verbose_name='Статус')
 
+    def calculate_total_sum(self):
+        total_sum = 0
+        items = OrderItem.objects.filter(order_id=self.id).values('price', 'quantity')
+        for item in items:
+            item_sum = item['price'] * item['quantity']
+            total_sum += item_sum
+        return total_sum
+
     def __str__(self):
         return f'{self.name} {self.surname}'
 
 
 class OrderItem(models.Model):
+    SIZES_CHOICES = (
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'ExtraLarge'),
+    )
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField(default=1)
+    size = models.CharField(max_length=2, choices=SIZES_CHOICES, default=SIZES_CHOICES[0][0], verbose_name='Размер')
+
+    def calculate_product_total_sum(self):
+        return self.quantity * self.price
 
     def __str__(self):
         return f'Order Item №{self.id}'

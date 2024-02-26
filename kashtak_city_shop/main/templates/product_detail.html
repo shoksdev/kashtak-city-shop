@@ -4,7 +4,7 @@
 <div>
     <div style="display: inline;">
         {% for image in product.images.all %}
-        <img src="{{ image.image.url }}" alt="Изображение товара" style="width: 250px; margin-left: 50px">
+            <img src="{{ image.image.url }}" alt="Изображение товара" style="width: 250px; margin-left: 50px">
         {% endfor %}
     </div>
     <p>{{ product.title }}</p>
