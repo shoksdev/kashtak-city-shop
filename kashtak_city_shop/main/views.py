@@ -15,19 +15,18 @@ class ProductListView(ListView):
     context_object_name = 'products_list'
     ordering = '-created'
 
-
-class ProductCategoryListView(ListView):
-    model = Product
-    template_name = 'products_list.html'
-    context_object_name = 'products_list'
-    ordering = '-created'
-
     def get_queryset(self):
-        return Product.objects.filter(category__slug=self.kwargs['category'])
+        category = self.kwargs.get('category', None)
+        if category is not None:
+            return Product.objects.filter(category__slug=category)
+        else:
+            return Product.objects.all()
 
     def get_context_data(self, *, object_list=None, **kwargs):
+        category = self.kwargs.get('category', None)
         data = super().get_context_data(**kwargs)
-        data['category_title'] = get_object_or_404(Category, slug=self.kwargs['category']).title
+        if category is not None:
+            data['category_title'] = get_object_or_404(Category, slug=category).title
         return data
 
 
@@ -52,15 +51,18 @@ class OrderCreateView(CreateView):
         instance = form.save()
         for item in cart:
             product = item['product']
+            size = item['size']
+            quantity = item['quantity']
             OrderItem.objects.create(
                 order=instance,
                 product=product,
                 price=item['price'],
-                quantity=item['quantity'],
-                size=item['size']
+                quantity=quantity,
+                size=size
             )
-            # product.quantity -= item['quantity']  # TODO: Удалять не из product.quantity, а из product.sizes.quantity
-            # product.save()
+            product_size = product.sizes.get(size=size)
+            product_size.quantity -= quantity
+            product_size.save()
         cart.clear()
 
         return redirect(reverse('order_created', kwargs={'pk': instance.id}))

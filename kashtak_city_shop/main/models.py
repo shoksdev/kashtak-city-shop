@@ -28,6 +28,16 @@ class Product(models.Model):
     gender = models.CharField(max_length=1, choices=GENDERS_CHOICES, default=GENDERS_CHOICES[0][0], verbose_name='Пол')
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время добавления')
 
+    def get_product_in_stock(self):
+        sizes = ProductSize.objects.filter(product=self.id)
+        quantity_flag = False
+        for size in sizes:
+            if size.quantity > 0:
+                quantity_flag = True
+                break
+
+        return quantity_flag
+
     def __str__(self):
         return self.title
 
@@ -66,7 +76,7 @@ class Order(models.Model):
     patronymic = models.CharField(max_length=52, verbose_name='Отчество')
     email = models.EmailField(verbose_name='Email')
     phoneNumberRegex = RegexValidator(regex=r'^((\+\d{,4})[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$')
-    phone = models.CharField(validators=[phoneNumberRegex], max_length=16, unique=True, verbose_name='Номер телефона')
+    phone = models.CharField(validators=[phoneNumberRegex], max_length=16, verbose_name='Номер телефона')
     region = models.CharField(max_length=52, verbose_name='Область')
     city = models.CharField(max_length=52, verbose_name='Город')
     street_name = models.CharField(max_length=52, verbose_name='Название улицы')

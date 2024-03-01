@@ -24,20 +24,6 @@ class Cart(object):
         Добавить продукт в корзину или обновить его количество.
         """
 
-        # for cart_item in cart:
-        #     if cart_item_new['product_id'] == cart_item['product_id'] and cart_item['size'] == cart_item_new['size']:
-        #         cart_item['quantity'] += cart_item_new['quantity']
-        #         break
-        #     else:
-        #         cart.append(cart_item_new)
-        #         break
-        # if product_id not in self.cart:
-        #     self.cart[product_id] = {'product_id': product_id, 'quantity': 0, 'size': size, 'price': str(product.price)}
-        # if update_quantity:
-        #     self.cart[product_id]['quantity'] = quantity
-        # else:
-        #     self.cart[product_id]['quantity'] += quantity
-
         product_id = product.id
 
         new_cart_item = {'product_id': product_id, 'quantity': quantity, 'size': size, 'price': str(product.price)}
@@ -46,7 +32,6 @@ class Cart(object):
             last_key = 0
         else:
             last_key = int(max(self.cart))
-        print(self.product_ids)
         if product_id not in self.product_ids:
             self.cart[last_key + 1] = new_cart_item
         else:
@@ -66,9 +51,6 @@ class Cart(object):
                 self.cart[last_key + 1] = new_cart_item
             else:
                 self.cart[cart_item_position]['quantity'] += quantity
-
-        print(self.cart)
-
         self.save()
 
     def save(self):

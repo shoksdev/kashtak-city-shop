@@ -11,8 +11,6 @@ def cart_add(request, pk):
         form = CartAddProductForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            print(cd)
-            print(product)
             cart.add(product=product,
                      quantity=cd['quantity'],
                      size=cd['size'],
