@@ -51,15 +51,15 @@ class ProductSize(models.Model):
     )
     size = models.CharField(max_length=2, choices=SIZES_CHOICES, default=SIZES_CHOICES[0][0], verbose_name='Размер')
     quantity = models.PositiveIntegerField(default=0, verbose_name='Количество')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sizes')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sizes', verbose_name='Товар')
 
     def __str__(self):
         return self.size
 
 
 class ProductImage(models.Model):
-    image = models.ImageField(upload_to='product_images/')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='product_images/', verbose_name='Изображение')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name='Товар')
 
 
 class Order(models.Model):
@@ -71,6 +71,8 @@ class Order(models.Model):
         ('Ж', 'Ждет получения'),
         ('П', 'Получен'),
     )
+    customer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, null=True, blank=True,
+                                 verbose_name='Заказчик')
     name = models.CharField(max_length=52, verbose_name='Имя')
     surname = models.CharField(max_length=52, verbose_name='Фамилия')
     patronymic = models.CharField(max_length=52, verbose_name='Отчество')
@@ -108,10 +110,10 @@ class OrderItem(models.Model):
         ('L', 'Large'),
         ('XL', 'ExtraLarge'),
     )
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.PositiveIntegerField(default=1)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Заказ')
+    product = models.ForeignKey(Product, on_delete=models.DO_NOTHING, verbose_name='Товар')
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
+    quantity = models.PositiveIntegerField(default=1, verbose_name='Количество')
     size = models.CharField(max_length=2, choices=SIZES_CHOICES, default=SIZES_CHOICES[0][0], verbose_name='Размер')
 
     def calculate_product_total_sum(self):

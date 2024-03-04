@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, CreateView
@@ -48,21 +49,46 @@ class OrderCreateView(CreateView):
 
     def form_valid(self, form):
         cart = Cart(self.request)
-        instance = form.save()
+        bonuses_for_user = cart.get_total_price() / 10
+        current_user = self.request.user
+        current_user.bonuses += bonuses_for_user
+        current_user.save()
+        order_data_for_create, product_sizes_data_for_update = [], []
+        instance = form.save(commit=False)
+        instance.customer = current_user
+        instance.save()
         for item in cart:
-            product = item['product']
-            size = item['size']
-            quantity = item['quantity']
-            OrderItem.objects.create(
-                order=instance,
-                product=product,
-                price=item['price'],
-                quantity=quantity,
-                size=size
+            item_product = item.get('product')
+            item_size = item.get('size')
+            item_quantity = item.get('quantity')
+            item_price = item.get('price')
+            order_data_for_create.append(
+                OrderItem(
+                    order=instance,
+                    product=item_product,
+                    price=item_price,
+                    quantity=item_quantity,
+                    size=item_size
+                ))
+
+        product_ids_from_new_order = [item.get('product_id') for item in cart]
+        product_sizes_from_new_order = [item.get('size') for item in cart]
+        product_quantities_from_new_order = [order_item.quantity for order_item in order_data_for_create]
+
+        product_sizes = ProductSize.objects.filter(product__in=product_ids_from_new_order,
+                                                   size__in=product_sizes_from_new_order)
+
+        for size in range(len(product_sizes)):
+            product_sizes_data_for_update.append(
+                ProductSize(
+                    id=product_sizes[size].id,
+                    quantity=product_sizes[size].quantity - product_quantities_from_new_order[size]
+                )
             )
-            product_size = product.sizes.get(size=size)
-            product_size.quantity -= quantity
-            product_size.save()
+        ProductSize.objects.bulk_update(product_sizes_data_for_update, ['quantity'])
+
+        OrderItem.objects.bulk_create(order_data_for_create)
+
         cart.clear()
 
         return redirect(reverse('order_created', kwargs={'pk': instance.id}))
