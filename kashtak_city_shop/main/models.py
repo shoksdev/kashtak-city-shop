@@ -62,6 +62,21 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name='Товар')
 
 
+class PromoCode(models.Model):
+    TYPES_CHOICES = (
+        ('%', 'Процент от суммы'),
+        ('-', 'Вычитание от суммы'),
+    )
+    promo_code = models.CharField(max_length=15, verbose_name='Промо код')
+    change_type = models.CharField(max_length=1, choices=TYPES_CHOICES, default=TYPES_CHOICES[0][0],
+                                   verbose_name='Тип изменения цены')
+    price_reduction = models.PositiveIntegerField(default=0, verbose_name='На сколько снижается цена')
+    activation_quantity = models.PositiveIntegerField(default=0, verbose_name='Количество активаций')
+
+    def __str__(self):
+        return self.promo_code
+
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('О', 'Оплачен'),
@@ -90,14 +105,9 @@ class Order(models.Model):
     comment = models.TextField(max_length=300, blank=True, null=True, verbose_name='Комментарий')
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0], verbose_name='Статус')
-
-    def calculate_total_sum(self):
-        total_sum = 0
-        items = OrderItem.objects.filter(order_id=self.id).values('price', 'quantity')
-        for item in items:
-            item_sum = item['price'] * item['quantity']
-            total_sum += item_sum
-        return total_sum
+    total_sum = models.PositiveIntegerField(default=0, null=True, blank=True, verbose_name='Общая сумма заказа')
+    promo_code = models.ForeignKey(PromoCode, on_delete=models.DO_NOTHING, null=True, blank=True,
+                                   verbose_name='Промокод')
 
     def __str__(self):
         return f'{self.name} {self.surname}'

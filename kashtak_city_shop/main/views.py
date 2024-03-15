@@ -3,8 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, CreateView
 
-from .forms import OrderCreateForm
-from .models import Product, Category, Order, OrderItem, ProductSize
+from .forms import OrderCreateForm, PromoCodeApplyForm
+from .models import Product, Category, Order, OrderItem, ProductSize, PromoCode
 from cart.forms import CartAddProductForm
 
 from cart.cart import Cart
@@ -47,6 +47,11 @@ class OrderCreateView(CreateView):
     template_name = 'order_create.html'
     form_class = OrderCreateForm
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['promo_code_apply_form'] = PromoCodeApplyForm()
+        return data
+
     def form_valid(self, form):
         cart = Cart(self.request)
         bonuses_for_user = cart.get_total_price() / 10
@@ -55,6 +60,8 @@ class OrderCreateView(CreateView):
         current_user.save()
         order_data_for_create, product_sizes_data_for_update = [], []
         instance = form.save(commit=False)
+        instance.promo_code = cart.promo_code
+        instance.total_sum = cart.get_total_price_after_discount()
         instance.customer = current_user
         instance.save()
         for item in cart:

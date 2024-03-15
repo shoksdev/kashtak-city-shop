@@ -11,8 +11,12 @@
             {% bootstrap_form form layout='horizontal' %}
             {% buttons submit='Создать' %}{% endbuttons %}
         </form>
-
-        <div style="margin-left: 100px">
+        <form action="{% url 'promo_code_apply' %}" method="POST" style="width: 400px; margin-left: 30px">
+            {% csrf_token %}
+            {% bootstrap_form promo_code_apply_form layout='horizontal' %}
+            {% buttons submit='Применить' %}{% endbuttons %}
+        </form>
+        <div style="margin-left: 40px">
             <p><strong>Ваш заказ:</strong></p>
             {% for item in cart %}
             <a href="{% url 'product_detail' pk=item.product.id %}">
@@ -26,7 +30,18 @@
             <p>{{ item.price }}</p>
             <p>{{ item.total_price }}</p>
             {% endfor %}
-            <p>Общая цена корзины: {{ cart.get_total_price }}</p>
+            <p>Общая стоимость заказа: {{ cart.get_total_price }}</p>
+            {% if cart.promo_code %}
+                <p>Применён промокод: "{{ cart.promo_code.promo_code }}"</p>
+                {% if cart.promo_code.change_type == '%' %}
+                    <p>Действие: -{{ cart.promo_code.price_reduction }}%</p>
+                {% elif cart.promo_code.change_type == '-' %}
+                    <p>Действие: -{{ cart.promo_code.price_reduction }}</p>
+                {% endif %}
+                <p>Цена с промокодом: {{ cart.get_total_price_after_discount|floatformat:"2" }}</p>
+            {% else %}
+                <p><strong>Такого промокода нет!</strong></p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

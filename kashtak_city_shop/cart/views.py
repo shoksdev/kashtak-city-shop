@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from main.models import Product
 from .cart import Cart
 from .forms import CartAddProductForm
+from main.forms import PromoCodeApplyForm
+from main.models import PromoCode
 
 
 def cart_add(request, pk):
@@ -38,3 +40,16 @@ def cart_remove_all_product_items(request, pk):
 def cart_detail(request):
     cart = Cart(request)
     return render(request, 'detail.html', {'cart': cart})
+
+
+def promo_code_apply(request):
+    if request.method == 'POST':
+        form = PromoCodeApplyForm(request.POST)
+        if form.is_valid():
+            promo_code_from_form = form.cleaned_data['promo_code']
+            try:
+                promo_code = PromoCode.objects.get(promo_code=promo_code_from_form)
+                request.session['promo_code_id'] = promo_code.id
+            except:
+                request.session['promo_code_id'] = None
+        return redirect('order_create')

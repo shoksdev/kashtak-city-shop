@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Product, Order, ProductImage, OrderItem, ProductSize
+from .models import Category, Product, Order, ProductImage, OrderItem, ProductSize, PromoCode
 
 
 @admin.register(Category)
@@ -34,3 +34,8 @@ class OrderItemInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('name', 'surname', 'email', 'phone', 'city', 'street_name')
     inlines = [OrderItemInline, ]
+
+
+@admin.register(PromoCode)
+class PromoCodeAdmin(admin.ModelAdmin):
+    list_display = ('promo_code', 'change_type', 'price_reduction', 'activation_quantity', )

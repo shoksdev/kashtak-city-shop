@@ -11,8 +11,8 @@
         <p>Размер: {{ order_item.size }}</p>
         <p>Количество товара: {{ order_item.quantity }}</p>
         <p>Цена одной единицы товара: {{ order_item.price }}</p>
-        <p>Цена товара в сумме: {{ order_item.calculate_product_total_sum }}</p>
+        <p>Общая стоимость товара: {{ order_item.calculate_product_total_sum }}</p>
     {% endfor %}
-    <p>Стоимость заказа: {{ order.calculate_total_sum }}</p>
+    <p>Стоимость заказа: {{ order.total_sum }}</p>
 
 {% endblock %}
