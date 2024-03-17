@@ -81,9 +81,8 @@ class OrderCreateView(CreateView):
         product_ids_from_new_order = [item.get('product_id') for item in cart]
         product_sizes_from_new_order = [item.get('size') for item in cart]
         product_quantities_from_new_order = [order_item.quantity for order_item in order_data_for_create]
-
         product_sizes = ProductSize.objects.filter(product__in=product_ids_from_new_order,
-                                                   size__in=product_sizes_from_new_order)
+                                                   size__in=product_sizes_from_new_order).distinct('size')
 
         for size in range(len(product_sizes)):
             product_sizes_data_for_update.append(
