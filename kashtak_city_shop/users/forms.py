@@ -13,20 +13,21 @@ class RegistrationUserForm(UserCreationForm):
 class InformationUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'username', 'email', 'avatar',)
+        fields = ('first_name', 'last_name', 'patronymic', 'username', 'email', 'avatar',)
 
 
 class AddressUpdateForm(forms.ModelForm):
+
     class Meta:
         model = CustomUser
         fields = ('region', 'city', 'street_name', 'house_number', 'entrance', 'floor', 'apartment', 'post_code',)
         widgets = {
-            'region': forms.TextInput(attrs={'placeholder': 'Томская область'}),
-            'city': forms.TextInput(attrs={'placeholder': 'Томск'}),
-            'street_name': forms.TextInput(attrs={'placeholder': 'Мюниха'}),
-            'house_number': forms.TextInput(attrs={'type': 'number', 'placeholder': '52'}),
-            'entrance': forms.TextInput(attrs={'type': 'number', 'placeholder': '5'}),
-            'floor': forms.TextInput(attrs={'type': 'number', 'placeholder': '2'}),
-            'apartment': forms.TextInput(attrs={'type': 'number', 'placeholder': '52'}),
-            'post_code': forms.TextInput(attrs={'type': 'number', 'placeholder': '524252'}),
+            'region': forms.TextInput(attrs={'placeholder': 'Томская область', 'required': True}),
+            'city': forms.TextInput(attrs={'placeholder': 'Томск', 'required': True}),
+            'street_name': forms.TextInput(attrs={'placeholder': 'Мюниха', 'required': True}),
+            'house_number': forms.TextInput(attrs={'type': 'number', 'placeholder': '52', 'required': True}),
+            'entrance': forms.TextInput(attrs={'type': 'number', 'placeholder': '5', 'required': True}),
+            'floor': forms.TextInput(attrs={'type': 'number', 'placeholder': '2', 'required': True}),
+            'apartment': forms.TextInput(attrs={'type': 'number', 'placeholder': '52', 'required': True}),
+            'post_code': forms.TextInput(attrs={'type': 'number', 'placeholder': '524252', 'required': True}),
         }

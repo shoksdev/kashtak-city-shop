@@ -13,7 +13,15 @@
     {% endif %}
     <p>Количество ваших бонусов: {{ request.user.bonuses }}</p>
     <p>Ваш реферальный код: {{ request.user.referral_code }}</p>
-
+    <a href="{% url 'password_change' %}" class="btn btn-primary">Изменить пароль</a>
+    <br>
+    <br>
+    <a href="{% url 'information_change' %}" class="btn btn-primary">Изменить информацию</a>
+    <br>
+    <br>
+    <a href="{% url 'address_change' %}" class="btn btn-primary">Изменить адрес</a>
+    <br>
+    <br>
     {% if orders_list %}
         <h2>Ваши заказы:</h2>
         {% for order in orders_list %}
@@ -30,11 +38,4 @@
     {% else %}
         <p>В данный момент у вас нет заказов, оформите его скорее!</p>
     {% endif %}
-    <a href="{% url 'password_change' %}" class="btn btn-primary">Изменить пароль</a>
-    <br>
-    <br>
-    <a href="{% url 'information_change' %}" class="btn btn-primary">Изменить информацию</a>
-    <br>
-    <br>
-    <a href="{% url 'address_change' %}" class="btn btn-primary">Изменить адрес</a>
 {% endblock %}

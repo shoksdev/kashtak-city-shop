@@ -4,13 +4,47 @@
 {% block title %}Создание заказа{% endblock %}
 
 {% block content %}
-    <h2>Создание категории</h2>
+    <h2>Создание заказа</h2>
     <div style="display: flex">
-        <form method="POST" style="width: 500px">
-            {% csrf_token %}
-            {% bootstrap_form form layout='horizontal' %}
-            {% buttons submit='Создать' %}{% endbuttons %}
-        </form>
+        <div>
+        {% if user.is_authenticated and user.region and user.name %}
+            <h5>Указанный вами адрес в профиле: </h5>
+            <p>Область: {{ user.region }}</p>
+            <p>Город: {{ user.city }}</p>
+            <p>Название улицы: {{ user.street_name }}</p>
+            <p>Номер дома: {{ user.house_number }}</p>
+            <p>Подъезд: {{ user.entrance }}</p>
+            <p>Этаж: {{ user.floor }}</p>
+            <p>Номер квартиры: {{ user.apartment }}</p>
+            <p>Почтовый индекс: {{ user.post_code }}</p>
+            <p>Имя: {{ user.name }}</p>
+            <p>Фамилия: {{ user.surname }}</p>
+            <p>Отчество: {{ user.patronymic }}</p>
+            <p>Электронная почта: {{ user.email }}</p>
+            <p>Номер телефона: {{ user.phone }}</p>
+
+            <h5>Изменить информацию о себе можно в профиле</h5>
+            <a href="{% url 'profile' %}" class="btn btn-primary">Профиль</a>
+        {% elif user.is_authenticated and user.region %}
+            <h5>Указанный вами адрес в профиле: </h5>
+            <p>Область: {{ user.region }}</p>
+            <p>Город: {{ user.city }}</p>
+            <p>Название улицы: {{ user.street_name }}</p>
+            <p>Номер дома: {{ user.house_number }}</p>
+            <p>Подъезд: {{ user.entrance }}</p>
+            <p>Этаж: {{ user.floor }}</p>
+            <p>Номер квартиры: {{ user.apartment }}</p>
+            <p>Почтовый индекс: {{ user.post_code }}</p>
+
+            <h5>Изменить адрес и добавить информацию о себе можно в профиле</h5>
+            <a href="{% url 'profile' %}" class="btn btn-primary">Профиль</a>
+        {% endif %}
+            <form method="POST" style="width: 500px">
+                {% csrf_token %}
+                {% bootstrap_form form layout='horizontal' %}
+                {% buttons submit='Создать' %}{% endbuttons %}
+            </form>
+        </div>
         <form action="{% url 'promo_code_apply' %}" method="POST" style="width: 400px; margin-left: 30px">
             {% csrf_token %}
             {% bootstrap_form promo_code_apply_form layout='horizontal' %}

@@ -3,7 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, CreateView
 
-from .forms import OrderCreateForm, PromoCodeApplyForm
+from .forms import PromoCodeApplyForm, OrderCreateFormForUserWithAddressAndInfo, \
+    OrderCreateFormForUserWithAddress, OrderCreateFormForUserWithoutAll
 from .models import Product, Category, Order, OrderItem, ProductSize, PromoCode
 from cart.forms import CartAddProductForm
 
@@ -45,7 +46,15 @@ class ProductDetailView(DetailView):
 class OrderCreateView(CreateView):
     model = Order
     template_name = 'order_create.html'
-    form_class = OrderCreateForm
+
+    def get_form_class(self):
+        current_user = self.request.user
+        if current_user.is_authenticated and current_user.region and current_user.first_name:
+            return OrderCreateFormForUserWithAddressAndInfo
+        elif current_user.is_authenticated and current_user.region:
+            return OrderCreateFormForUserWithAddress
+        else:
+            return OrderCreateFormForUserWithoutAll
 
     def get_context_data(self, *, object_list=None, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -60,6 +69,32 @@ class OrderCreateView(CreateView):
         current_user.save()
         order_data_for_create, product_sizes_data_for_update = [], []
         instance = form.save(commit=False)
+
+        if current_user.is_authenticated and current_user.region and current_user.first_name:
+            instance.region = current_user.region
+            instance.city = current_user.city
+            instance.street_name = current_user.street_name
+            instance.house_number = current_user.house_number
+            instance.entrance = current_user.entrance
+            instance.floor = current_user.floor
+            instance.apartment = current_user.apartment
+            instance.post_code = current_user.post_code
+            instance.email = current_user.email
+            instance.phone = current_user.phone
+            instance.name = current_user.first_name
+            instance.surname = current_user.last_name
+            instance.patronymic = current_user.patronymic
+        elif current_user.is_authenticated and current_user.region:
+            instance.region = current_user.region
+            instance.city = current_user.city
+            instance.street_name = current_user.street_name
+            instance.house_number = current_user.house_number
+            instance.entrance = current_user.entrance
+            instance.floor = current_user.floor
+            instance.apartment = current_user.apartment
+            instance.post_code = current_user.post_code
+            instance.email = current_user.email
+
         instance.promo_code = cart.promo_code
         instance.total_sum = cart.get_total_price_after_discount()
         instance.customer = current_user

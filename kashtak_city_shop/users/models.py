@@ -5,16 +5,19 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomUser(AbstractUser):
-    email = models.EmailField(_("email address"), unique=True)
+    first_name = models.CharField(_("Имя"), max_length=150, blank=True, null=True)
+    last_name = models.CharField(_("Фамилия"), max_length=150, blank=True, null=True)
+    patronymic = models.CharField(_("Отчество"), max_length=150, blank=True, null=True)
+    email = models.EmailField(_("Email"), unique=True)
     username = models.CharField(
-        _("username"),
+        _("Юзернейм"),
         max_length=150,
         unique=False,
         help_text=_(
             "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
         ),
         error_messages={
-            "unique": _("A user with that username already exists."),
+            "uniqe": _("A user with that username already exists."),
         },
     )
     phoneNumberRegex = RegexValidator(regex=r'^((\+\d{,4})[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$')
