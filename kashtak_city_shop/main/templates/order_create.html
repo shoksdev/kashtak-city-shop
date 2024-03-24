@@ -65,7 +65,7 @@
             <p>{{ item.total_price }}</p>
             {% endfor %}
             <p>Общая стоимость заказа: {{ cart.get_total_price }}</p>
-            {% if cart.promo_code %}
+             {% if cart.promo_code_id and cart.promo_code_id != 'Не найдено'  %}
                 <p>Применён промокод: "{{ cart.promo_code.promo_code }}"</p>
                 {% if cart.promo_code.change_type == '%' %}
                     <p>Действие: -{{ cart.promo_code.price_reduction }}%</p>
@@ -73,7 +73,7 @@
                     <p>Действие: -{{ cart.promo_code.price_reduction }}</p>
                 {% endif %}
                 <p>Цена с промокодом: {{ cart.get_total_price_after_discount|floatformat:"2" }}</p>
-            {% else %}
+            {% elif cart.promo_code_id == 'Не найдено' %}
                 <p><strong>Такого промокода нет!</strong></p>
             {% endif %}
         </div>

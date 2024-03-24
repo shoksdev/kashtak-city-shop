@@ -37,7 +37,7 @@
                 <option value="" selected>Выберите размер</option>
                 {% for size in product.sizes.all %}
                     {% if size.quantity != 0 %}
-                        <option value="{{ size.size }}">{{ size.size }}</option>
+                        <option value="{{ size.id }}">{{ size.size }}</option>
                     {% endif %}
                 {% endfor %}
             </select>

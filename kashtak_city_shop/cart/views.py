@@ -1,9 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from main.models import Product
+from main.models import Product, PromoCode, ProductSize
 from .cart import Cart
-from .forms import CartAddProductForm
-from main.forms import PromoCodeApplyForm
-from main.models import PromoCode
+from .forms import CartAddProductForm, PromoCodeApplyForm
 
 
 def cart_add(request, pk):
@@ -13,9 +11,10 @@ def cart_add(request, pk):
         form = CartAddProductForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
+            size = get_object_or_404(ProductSize, id=int(cd['size']))
             cart.add(product=product,
                      quantity=cd['quantity'],
-                     size=cd['size'],
+                     size=size,
                      update_quantity=cd['update'])
         return redirect('cart_detail')
 
@@ -50,6 +49,6 @@ def promo_code_apply(request):
             try:
                 promo_code = PromoCode.objects.get(promo_code=promo_code_from_form)
                 request.session['promo_code_id'] = promo_code.id
-            except:
-                request.session['promo_code_id'] = None
+            except PromoCode.DoesNotExist:
+                request.session['promo_code_id'] = 'Не найдено'
         return redirect('order_create')

@@ -1,8 +1,6 @@
 from decimal import Decimal
 from django.conf import settings
-from main.models import Product
-
-from main.models import PromoCode
+from main.models import Product, ProductSize, PromoCode
 
 
 class Cart(object):
@@ -18,8 +16,10 @@ class Cart(object):
             cart = self.session[settings.CART_SESSION_ID] = {}
         self.cart = cart
         self.product_ids = set()
+        self.sizes_ids = set()
         for cart_item in self.cart.values():
             self.product_ids.add(int(cart_item.get('product_id')))
+            self.sizes_ids.add(int(cart_item.get('size_id')))
         self.promo_code_id = self.session.get('promo_code_id')
 
     def add(self, product, size, quantity=1, update_quantity=False):
@@ -28,8 +28,9 @@ class Cart(object):
         """
 
         product_id = product.id
+        size_id = size.id
 
-        new_cart_item = {'product_id': product_id, 'quantity': quantity, 'size': size, 'price': str(product.price)}
+        new_cart_item = {'product_id': product_id, 'quantity': quantity, 'size_id': size_id, 'price': str(product.price)}
 
         if not bool(self.cart):
             last_key = 0
@@ -45,10 +46,10 @@ class Cart(object):
                 if self.cart[cart_item_str]['product_id'] == product_id and update_quantity:
                     self.cart[cart_item_str]['quantity'] = quantity
                     break
-                elif self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] == size:
+                elif self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] == size_id:
                     flag, cart_item_position = False, cart_item_str
                     break
-                elif self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] != size:
+                elif self.cart[cart_item_str]['product_id'] == product_id and self.cart[cart_item_str]['size'] != size_id:
                     flag = True
             if flag:
                 self.cart[last_key + 1] = new_cart_item
@@ -86,11 +87,14 @@ class Cart(object):
         """
         Перебор элементов в корзине и получение продуктов из базы данных.
         """
-        # получение объектов product и добавление их в корзину
         products = Product.objects.filter(id__in=self.product_ids)
+        sizes = ProductSize.objects.filter(id__in=self.sizes_ids)
+
         for value in self.cart.values():
             product = products.get(id=value['product_id'])
+            size = sizes.get(id=value['size_id'])
             value['product'] = product
+            value['size'] = size.size
 
         for key, value in self.cart.items():
             value['price'] = Decimal(value['price'])
@@ -114,17 +118,19 @@ class Cart(object):
     def clear(self):
         # удаление корзины из сессии
         del self.session[settings.CART_SESSION_ID]
+        if self.session.get('promo_code_id'):
+            del self.session['promo_code_id']
         self.session.modified = True
 
     @property
     def promo_code(self):
-        if self.promo_code_id:
+        if self.promo_code_id != 'Не найдено' and self.promo_code_id is not None:
             return PromoCode.objects.get(id=self.promo_code_id)
         else:
             return None
 
     def get_discount(self):
-        if self.promo_code:
+        if self.promo_code != 'Не найдено':
             if self.promo_code.change_type == '%':
                 return (self.promo_code.price_reduction / Decimal('100')) * self.get_total_price()
             elif self.promo_code.change_type == '-':
@@ -133,4 +139,5 @@ class Cart(object):
             return Decimal('0')
 
     def get_total_price_after_discount(self):
+
         return self.get_total_price() - self.get_discount()

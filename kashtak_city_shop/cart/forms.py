@@ -6,3 +6,7 @@ class CartAddProductForm(forms.Form):
     quantity = forms.IntegerField(min_value=1, widget=forms.NumberInput(attrs={"class": "form-control w-25"}),
                                   label='Введите количество')
     update = forms.BooleanField(required=False, initial=False, widget=forms.HiddenInput, label='')
+
+
+class PromoCodeApplyForm(forms.Form):
+    promo_code = forms.CharField(label='Промокод')

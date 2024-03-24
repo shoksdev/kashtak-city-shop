@@ -4,7 +4,23 @@
 
 {% block content %}
     <h1>Спасибо!</h1>
-    <p>Ваш заказ создан, вот информация о нем:</p>
+    <h2>Ваш заказ создан, вот информация о нем:</h2>
+    <h4>Адрес:</h4>
+    <p>Область: {{ order.region }}</p>
+    <p>Город: {{ order.city }}</p>
+    <p>Название улицы: {{ order.street_name }}</p>
+    <p>Номер дома: {{ order.house_number }}</p>
+    <p>Подъезд: {{ order.entrance }}</p>
+    <p>Этаж: {{ order.floor }}</p>
+    <p>Номер квартиры: {{ order.apartment }}</p>
+    <p>Почтовый индекс: {{ order.post_code }}</p>
+    <h4>Контактная информация:</h4>
+    <p>Имя: {{ order.name }}</p>
+    <p>Фамилия: {{ order.surname }}</p>
+    <p>Отчество: {{ order.patronymic }}</p>
+    <p>Электронная почта: {{ order.email }}</p>
+    <p>Номер телефона: {{ order.phone }}</p>
+    <h4>Товары:</h4>
     {% for order_item in order.items.all %}
         <p><img src="{{ order_item.product.images.all.0.image.url }}" alt="Изображение товара" style="width: 300px;"></p>
         <p>Название: {{ order_item.product.title }}</p>
@@ -13,6 +29,18 @@
         <p>Цена одной единицы товара: {{ order_item.price }}</p>
         <p>Общая стоимость товара: {{ order_item.calculate_product_total_sum }}</p>
     {% endfor %}
-    <p>Стоимость заказа: {{ order.total_sum }}</p>
-
+    <h4>Стоимость:</h4>
+    {% if order.promo_code %}
+        <p>Стоимость заказа со скидкой: {{ order.total_sum }}</p>
+        <p>Промокод: {{ order.promo_code }}</p>
+        <p>Скидка: -{{ order.promo_code.price_reduction }}
+        {% if order.promo_code.change_type == '%' %}
+            {{ order.promo_code.change_type }}
+        {% else %}
+            рублей
+        {% endif %}
+        </p>
+    {% else %}
+        <p>Стоимость заказа: {{ order.total_sum }}</p>
+    {% endif %}
 {% endblock %}

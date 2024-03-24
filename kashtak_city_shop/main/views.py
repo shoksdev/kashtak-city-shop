@@ -3,10 +3,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, CreateView
 
-from .forms import PromoCodeApplyForm, OrderCreateFormForUserWithAddressAndInfo, \
+from .forms import OrderCreateFormForUserWithAddressAndInfo, \
     OrderCreateFormForUserWithAddress, OrderCreateFormForUserWithoutAll
 from .models import Product, Category, Order, OrderItem, ProductSize, PromoCode
-from cart.forms import CartAddProductForm
+from cart.forms import CartAddProductForm, PromoCodeApplyForm
 
 from cart.cart import Cart
 
@@ -70,7 +70,7 @@ class OrderCreateView(CreateView):
         order_data_for_create, product_sizes_data_for_update = [], []
         instance = form.save(commit=False)
 
-        if current_user.is_authenticated and current_user.region and current_user.first_name:
+        if current_user.is_authenticated and current_user.region:
             instance.region = current_user.region
             instance.city = current_user.city
             instance.street_name = current_user.street_name
@@ -81,23 +81,19 @@ class OrderCreateView(CreateView):
             instance.post_code = current_user.post_code
             instance.email = current_user.email
             instance.phone = current_user.phone
-            instance.name = current_user.first_name
-            instance.surname = current_user.last_name
-            instance.patronymic = current_user.patronymic
-        elif current_user.is_authenticated and current_user.region:
-            instance.region = current_user.region
-            instance.city = current_user.city
-            instance.street_name = current_user.street_name
-            instance.house_number = current_user.house_number
-            instance.entrance = current_user.entrance
-            instance.floor = current_user.floor
-            instance.apartment = current_user.apartment
-            instance.post_code = current_user.post_code
-            instance.email = current_user.email
+            if current_user.first_name:
+                instance.name = current_user.first_name
+                instance.surname = current_user.last_name
+                instance.patronymic = current_user.patronymic
 
-        instance.promo_code = cart.promo_code
-        instance.total_sum = cart.get_total_price_after_discount()
         instance.customer = current_user
+        promo_code = cart.promo_code
+        if promo_code:
+            instance.promo_code = promo_code
+            instance.total_sum = cart.get_total_price_after_discount()
+        else:
+            instance.total_sum = cart.get_total_price()
+
         instance.save()
         for item in cart:
             item_product = item.get('product')
@@ -113,11 +109,9 @@ class OrderCreateView(CreateView):
                     size=item_size
                 ))
 
-        product_ids_from_new_order = [item.get('product_id') for item in cart]
-        product_sizes_from_new_order = [item.get('size') for item in cart]
+        size_ids_from_new_order = [item.get('size_id') for item in cart]
         product_quantities_from_new_order = [order_item.quantity for order_item in order_data_for_create]
-        product_sizes = ProductSize.objects.filter(product__in=product_ids_from_new_order,
-                                                   size__in=product_sizes_from_new_order).distinct('size')
+        product_sizes = ProductSize.objects.filter(id__in=size_ids_from_new_order)
 
         for size in range(len(product_sizes)):
             product_sizes_data_for_update.append(
@@ -126,8 +120,8 @@ class OrderCreateView(CreateView):
                     quantity=product_sizes[size].quantity - product_quantities_from_new_order[size]
                 )
             )
-        ProductSize.objects.bulk_update(product_sizes_data_for_update, ['quantity'])
 
+        ProductSize.objects.bulk_update(product_sizes_data_for_update, ['quantity'])
         OrderItem.objects.bulk_create(order_data_for_create)
 
         cart.clear()
